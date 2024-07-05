@@ -1,0 +1,73 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // Ancho de la pantalla OLED
+#define SCREEN_HEIGHT 64 // Altura de la pantalla OLED
+
+// Dirección I2C de la pantalla OLED (generalmente es 0x3C)
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// Define los pines de los botones en la ESP32
+#define BUTTON_PIN_1 18
+#define BUTTON_PIN_2 19
+
+// Array de bytes para la imagen 1
+const uint8_t PROGMEM image1[] = {
+  // Añade aquí el array de bytes generado para la imagen 1
+};
+
+// Array de bytes para la imagen 2
+const uint8_t PROGMEM image2[] = {
+  // Añade aquí el array de bytes generado para la imagen 2
+};
+
+void setup() {
+  // Inicializa la comunicación serie para depuración
+  Serial.begin(9600);
+
+  // Configura los pines de los botones como entradas con pull-up interno
+  pinMode(BUTTON_PIN_1, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_2, INPUT_PULLUP);
+
+  // Inicializa la pantalla OLED con la dirección I2C 0x3C
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("No se pudo inicializar la pantalla SSD1306"));
+    for(;;); // Entra en un bucle infinito si la inicialización falla
+  }
+
+  // Limpia el buffer de la pantalla
+  display.clearDisplay();
+  display.display();
+}
+
+void loop() {
+  // Lee el estado de los botones
+  int buttonState1 = digitalRead(BUTTON_PIN_1);
+  int buttonState2 = digitalRead(BUTTON_PIN_2);
+
+  // Limpia el buffer de la pantalla
+  display.clearDisplay();
+
+  // Verifica qué botón está presionado y muestra la imagen correspondiente
+  if (buttonState1 == LOW) {
+    // Botón 1 presionado - muestra la imagen 1
+    display.drawBitmap(0, 0, image1, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+  } else if (buttonState2 == LOW) {
+    // Botón 2 presionado - muestra la imagen 2
+    display.drawBitmap(0, 0, image2, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
+  } else {
+    // Ningún botón presionado - muestra un mensaje
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.println(F("Presiona un boton"));
+  }
+
+  // Muestra el contenido del buffer en la pantalla
+  display.display();
+
+  // Espera un corto período antes de verificar nuevamente
+  delay(100);
+}
